@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bykdj5m5kgto2"]
+[gd_scene load_steps=3 format=3 uid="uid://bykdj5m5kgto2"]
 
 [ext_resource type="PackedScene" uid="uid://cixo0tv4glhjg" path="res://player.tscn" id="1_ig7tw"]
+[ext_resource type="PackedScene" uid="uid://dm2e62meawntq" path="res://ui.tscn" id="2_0xm2m"]
 
 [node name="Main" type="Node2D"]
 
@@ -9,3 +10,5 @@
 [node name="TrashSpawner" type="Node2D" parent="."]
 
 [node name="TrashContainer" type="Node2D" parent="."]
+
+[node name="UI" parent="." instance=ExtResource("2_0xm2m")]

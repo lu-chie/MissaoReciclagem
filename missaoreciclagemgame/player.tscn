@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://cixo0tv4glhjg"]
 
 [ext_resource type="Script" uid="uid://cdil631r1r25r" path="res://character_body_2d.gd" id="1_onrkg"]
-[ext_resource type="Texture2D" uid="uid://drmrwnnhen0fg" path="res://icon.svg" id="2_i3pqv"]
+[ext_resource type="Texture2D" uid="uid://bq4va3tdwxtqn" path="res://assets/player_crab.png" id="2_onrkg"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hqtel"]
 size = Vector2(117, 123)
@@ -13,7 +13,9 @@ position = Vector2(517, 570)
 script = ExtResource("1_onrkg")
 
 [node name="Sprite2D" type="Sprite2D" parent="CharacterBody2D"]
-texture = ExtResource("2_i3pqv")
+position = Vector2(-2, 19.5)
+scale = Vector2(1.74603, 1.76596)
+texture = ExtResource("2_onrkg")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
 position = Vector2(-1.5, -0.5)
