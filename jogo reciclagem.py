@@ -307,13 +307,9 @@ while rodando:
             if l["rect"].y >= ALTURA:
                 lixos_caidos.append(l)
         
-        # Processar lixos que caíram no chão - jogador perde vida
+        # Processar lixos que caíram no chão - apenas remover da tela
         if lixos_caidos:
-            vidas -= len(lixos_caidos)  # Perder 1 vida por lixo que caiu
-            if som_erro: som_erro.play()  # Som de erro
-            # Verificar game over
-            if vidas <= 0:
-                game_over = True
+            pass  # Lixos simplesmente desaparecem sem causar dano
         
         # Remove lixos que saem da tela
         lixos = [l for l in lixos if l["rect"].y < ALTURA]
@@ -464,14 +460,11 @@ while rodando:
         
         # Controles no canto inferior direito
         controles_texto1 = font_pequena.render("1-4: Lixeiras | Q/E: Alternar | A/D: Mover", True, BRANCO)
-        controles_texto2 = font_pequena.render("⚠️ Lixos no chão = -1 VIDA", True, VERMELHO)
         
         # Posicionar no canto direito
         controles_width1 = controles_texto1.get_width()
-        controles_width2 = controles_texto2.get_width()
         
         tela.blit(controles_texto1, (LARGURA - controles_width1 - 20, ALTURA - 50))
-        tela.blit(controles_texto2, (LARGURA - controles_width2 - 20, ALTURA - 30))
 
     pygame.display.flip()
 
