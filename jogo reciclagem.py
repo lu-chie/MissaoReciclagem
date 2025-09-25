@@ -64,7 +64,7 @@ class AnimatedBackground:
             self.current_period = 'day'  # 'day', 'dawn_dusk', 'night'
             self.frame_index = 0
             self.animation_timer = 0
-            self.frame_duration = 200  # ms por frame
+            self.frame_duration = 400  # Aumentado de 200ms para 400ms (mais lento)
             self.period_duration = 30000  # 30 segundos por período
             self.period_timer = 0
             
@@ -193,6 +193,9 @@ velocidade_base = 1
 velocidade_maxima = 6
 incremento_velocidade = 0.2
 
+# Timer do jogo
+tempo_inicial = pygame.time.get_ticks()
+
 # Sistema de classificação
 def get_classificacao(pontos):
     if pontos >= 100:
@@ -207,6 +210,32 @@ def get_classificacao(pontos):
         return "APRENDIZ", CINZA_ESCURO
     else:
         return "INICIANTE", PRETO
+
+# Função para formatar tempo
+def formatar_tempo(milliseconds):
+    seconds = milliseconds // 1000
+    minutes = seconds // 60
+    seconds = seconds % 60
+    return f"{minutes:02d}:{seconds:02d}"
+
+# Função para desenhar coração
+def desenhar_coracao(screen, x, y, tamanho=12):
+    # Cor vermelha para o coração
+    cor_coracao = (200, 0, 50)
+    
+    # Coordenadas do coração baseadas no centro (x, y)
+    # Duas metades circulares superiores
+    raio = tamanho // 2
+    pygame.draw.circle(screen, cor_coracao, (x - raio//2, y - raio//3), raio//2)
+    pygame.draw.circle(screen, cor_coracao, (x + raio//2, y - raio//3), raio//2)
+    
+    # Triângulo inferior do coração
+    pontos_triangulo = [
+        (x - raio, y),
+        (x + raio, y),
+        (x, y + raio)
+    ]
+    pygame.draw.polygon(screen, cor_coracao, pontos_triangulo)
 
 # Clock para controle de FPS e delta time
 clock = pygame.time.Clock()
@@ -310,10 +339,10 @@ while rodando:
     # Soltar lixo na lixeira
     if lixo_coletado:
         # Mostrar lixo coletado no HUD superior
-        pygame.draw.rect(tela, AMARELO, (400, 90, 150, 30))
-        pygame.draw.rect(tela, PRETO, (400, 90, 150, 30), 2)
+        pygame.draw.rect(tela, AMARELO, (350, 70, 150, 30))
+        pygame.draw.rect(tela, PRETO, (350, 70, 150, 30), 2)
         texto = font.render(f"COLETADO: {lixo_coletado['tipo'].upper()}", True, PRETO)
-        tela.blit(texto, (405, 95))
+        tela.blit(texto, (355, 75))
 
         # Colisão com player segurando lixeira selecionada
         lixeira_rect = pygame.Rect(player_pos[0], player_pos[1], 50, 50)
@@ -372,6 +401,7 @@ while rodando:
             lixo_coletado = None
             lixeira_atual = "vidro"  # Reset para lixeira inicial
             lixos_coletados = 0  # Reset contador de dificuldade
+            tempo_inicial = pygame.time.get_ticks()  # Reset timer
             lixos.clear()
             for _ in range(5):
                 tipo = random.choice(tipos_lixo)
@@ -380,73 +410,68 @@ while rodando:
                 rect = pygame.Rect(x, y, 30, 30)
                 lixos.append({"tipo": tipo, "rect": rect, "vel": velocidade_base})
 
-    # HUD Melhorado
-    # Painel superior com fundo semi-transparente
-    hud_surface = pygame.Surface((LARGURA, 120))
-    hud_surface.set_alpha(180)  # Semi-transparência
+    # HUD Reorganizado
+    # Painel superior com fundo mais transparente
+    hud_surface = pygame.Surface((LARGURA, 70))
+    hud_surface.set_alpha(100)  # Mais transparente (era 180)
     hud_surface.fill(CINZA_CLARO)
     tela.blit(hud_surface, (0, 0))
-    pygame.draw.rect(tela, CINZA_ESCURO, (0, 0, LARGURA, 120), 2)
+    pygame.draw.rect(tela, CINZA_ESCURO, (0, 0, LARGURA, 70), 2)
     
-    # Pontuação com ícone
-    font_grande = pygame.font.SysFont(None, 48)
-    font_media = pygame.font.SysFont(None, 32)
+    # Definir fontes
+    font_grande = pygame.font.SysFont(None, 40)
+    font_media = pygame.font.SysFont(None, 32) 
     font_pequena = pygame.font.SysFont(None, 24)
     
-    pontos_texto = font_grande.render(f"PONTOS: {pontos}", True, PRETO)
-    tela.blit(pontos_texto, (20, 15))
+    # LADO ESQUERDO - SCORE e TIME
+    score_texto = font_grande.render(f"SCORE: {pontos}", True, PRETO)
+    tela.blit(score_texto, (20, 10))
     
-    # Vidas com corações (agora até 5)
-    vidas_texto = font_media.render("VIDAS:", True, PRETO)
-    tela.blit(vidas_texto, (300, 25))
-    for i in range(vidas):
-        pygame.draw.circle(tela, VERMELHO, (380 + i * 25, 35), 8)
+    # Calcular tempo decorrido
+    tempo_atual = pygame.time.get_ticks()
+    tempo_decorrido = tempo_atual - tempo_inicial
+    time_texto = font_media.render(f"TIME: {formatar_tempo(tempo_decorrido)}", True, PRETO)
+    tela.blit(time_texto, (20, 40))
     
-    # Lixeira atual com sprite pequeno
+    # CENTRO - LIXEIRA ATUAL (com mais espaçamento)
     lixeira_texto = font_media.render("LIXEIRA:", True, PRETO)
-    tela.blit(lixeira_texto, (450, 25))
-    sprite_mini = pygame.transform.scale(SPRITE_LIXEIRAS[lixeira_atual], (25, 25))
-    tela.blit(sprite_mini, (550, 25))
+    tela.blit(lixeira_texto, (280, 15))
+    sprite_mini = pygame.transform.scale(SPRITE_LIXEIRAS[lixeira_atual], (30, 30))
+    tela.blit(sprite_mini, (380, 10))  # Mais espaçamento (era 390)
     lixeira_nome = font_pequena.render(lixeira_atual.upper(), True, PRETO)
-    tela.blit(lixeira_nome, (580, 30))
+    tela.blit(lixeira_nome, (420, 20))  # Ajustado também (era 425)
     
-    # Sistema de período do dia
-    periodo_nome, periodo_progresso = animated_background.get_period_info()
-    periodo_texto = font_media.render(f"PERÍODO: {periodo_nome}", True, PRETO)
-    tela.blit(periodo_texto, (20, 55))
+    # LADO DIREITO - VIDAS
+    vidas_texto = font_media.render(f"x{vidas}", True, PRETO)
+    # Posicionar no canto direito
+    vidas_width = vidas_texto.get_width()
+    tela.blit(vidas_texto, (LARGURA - vidas_width - 50, 20))
     
-    # Barra de progresso do período
-    barra_rect = pygame.Rect(200, 65, 100, 10)
-    pygame.draw.rect(tela, CINZA_ESCURO, barra_rect)
-    progresso_width = int((periodo_progresso / 100) * 100)
-    progresso_rect = pygame.Rect(200, 65, progresso_width, 10)
-    # Cor da barra baseada no período
-    cor_periodo = AMARELO if periodo_nome == 'DIA' else (255, 165, 0) if periodo_nome == 'ENTARDECER' else AZUL
-    pygame.draw.rect(tela, cor_periodo, progresso_rect)
+    # Desenhar um coração ao lado do contador de vidas
+    desenhar_coracao(tela, LARGURA - 25, 30, 14)
     
-    # Dificuldade e velocidade atual
-    velocidade_atual = max(velocidade_base, min(velocidade_maxima, velocidade_base + (lixos_coletados * incremento_velocidade)))
-    dificuldade_texto = font_pequena.render(f"COLETADOS: {lixos_coletados} | VEL: {velocidade_atual:.1f}", True, PRETO)
-    tela.blit(dificuldade_texto, (320, 80))
-    
-    # Classificação atual
-    classificacao_atual, cor_class = get_classificacao(pontos)
-    class_texto = font_pequena.render(f"NÍVEL: {classificacao_atual}", True, cor_class)
-    tela.blit(class_texto, (450, 95))
-    
-    # Controles no canto inferior esquerdo
+    # Informações adicionais menores no rodapé
     if not game_over:
-        controles_texto1 = font_pequena.render("CONTROLES:", True, BRANCO)
-        controles_texto2 = font_pequena.render("1-4: Selecionar lixeira", True, BRANCO)
-        controles_texto3 = font_pequena.render("Q/E: Alternar", True, BRANCO)
-        controles_texto4 = font_pequena.render("A/D: Mover", True, BRANCO)
-        controles_texto5 = font_pequena.render("⚠️ Lixos no chão = -1 VIDA", True, VERMELHO)
+        # Velocidade atual e coletados (menor, no canto inferior)
+        velocidade_atual = max(velocidade_base, min(velocidade_maxima, velocidade_base + (lixos_coletados * incremento_velocidade)))
+        info_texto = font_pequena.render(f"Coletados: {lixos_coletados} | Velocidade: {velocidade_atual:.1f}", True, BRANCO)
+        tela.blit(info_texto, (20, ALTURA - 50))
         
-        tela.blit(controles_texto1, (10, ALTURA - 110))
-        tela.blit(controles_texto2, (10, ALTURA - 90))
-        tela.blit(controles_texto3, (10, ALTURA - 70))
-        tela.blit(controles_texto4, (10, ALTURA - 50))
-        tela.blit(controles_texto5, (10, ALTURA - 30))
+        # Classificação atual
+        classificacao_atual, cor_class = get_classificacao(pontos)
+        class_texto = font_pequena.render(f"Nível: {classificacao_atual}", True, cor_class)
+        tela.blit(class_texto, (20, ALTURA - 30))
+        
+        # Controles no canto inferior direito
+        controles_texto1 = font_pequena.render("1-4: Lixeiras | Q/E: Alternar | A/D: Mover", True, BRANCO)
+        controles_texto2 = font_pequena.render("⚠️ Lixos no chão = -1 VIDA", True, VERMELHO)
+        
+        # Posicionar no canto direito
+        controles_width1 = controles_texto1.get_width()
+        controles_width2 = controles_texto2.get_width()
+        
+        tela.blit(controles_texto1, (LARGURA - controles_width1 - 20, ALTURA - 50))
+        tela.blit(controles_texto2, (LARGURA - controles_width2 - 20, ALTURA - 30))
 
     pygame.display.flip()
 
